@@ -1,19 +1,29 @@
 <html>
     <head>
-        <title>Projector Experiment</title>
+        <title>NYIT ATM</title>
+        <link rel="stylesheet" type="text/css" href="/style/main.css">
     </head>
     
     <body>
+        <div class="banner">
+            <h1>Please enter the user ID</h1>
+        </div>
+
         {% if err %}
             <p style='color:red'>Your ID is wrong! Please retrieve it here by typing your Subject ID</p>
         {% endif %}
 
-        <form method='post'>
-            <label for="email">Subject ID:</label>
-            <input type="text" id="email" name="email">
-            <button type="submit">Submit</button>
-        </form>
-        
-        {{ result|safe }}
+        <div class="card signin-card shift-form">
+            <form method="post">
+                
+                
+                <div class="form-panel second">
+                    <label class="hidden-label" for="userID">User ID</label>
+                    <input id="userID" name="userID" type="text" placeholder="User ID">
+                </div>
+
+                <button type="submit">Submit</button>
+            </form>
+        </div>
     </body>
 </html>

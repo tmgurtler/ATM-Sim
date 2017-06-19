@@ -1,0 +1,33 @@
+Welcome screen
+Practice PIN entry screen
+Real typing/break screens
+
+database needs:
+    user ID, PIN, which key, which attempt, timing, (which set?), (which number in set?) (on bad input, give illegal response?)
+    user ID, number times gone, which group
+
+on typing screens:
+    numPINEntry == -1: display PIN
+    numPINEntry == 0 or 1: display entry form, load keystroke data, check entry for correctness
+        on incorrect entry, reset numPINEntry to -1
+        on correct entry, increment numPINEntry
+    numPINEntry == 2: display entry form, load keystroke data, check entry for correctness
+        on incorrect entry, reset numPINEntry to -1
+        on correct entry: move first element of order string to end of hold string
+            set numPINEntry to -1
+            if the hold string is 5 characters long, increment numSetEntry and go to break screen
+            otherwise just reload
+
+on break screens:
+    code for loading bar? ugh.
+    if numSetEntry is 3, throw away hold string before returning to typing screen
+    otherwise, return hold string to beginning of order string
+
+use a cookie?
+    which includes:
+        user ID
+        set number
+        order string
+        hold string
+        number through set
+        number through PIN

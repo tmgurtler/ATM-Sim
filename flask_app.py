@@ -58,12 +58,13 @@ def end():
 # With a POST request, this will find the internal representation of the ID, and generate a link for a unique experiment from it
 #
 # (I don't think this needs edited much, although the underlying DB might change)
+@app.route('/', methods=['GET', 'POST'])
 @app.route('/get_uid', methods=['GET', 'POST'])
 def get_uid():
     result = ''
     vars = ''
     if request.method == 'POST':
-        email = request.form['email']
+        email = request.form['userID']
         conn = sqlite3.connect('attempts.db')
         c = conn.cursor()
         c.execute('SELECT uid FROM uids where email=?', (email,))
@@ -75,8 +76,8 @@ def get_uid():
             c.execute('INSERT INTO uids VALUES (?,?)', (uid, email))
             conn.commit()
             vars = uid
-        result = 'Your URL to access the experiment is <a href=".{}">'.format(url_for('experiment', uid=vars)) + pythonanywhere_username + '.pythonanywhere.com{}</a>'.format(url_for('experiment', uid=vars))
         conn.close()
+        return redirect(url_for('experiment', uid=vars))
     return render_template('uid.html', result=result)
 
 def check_auth(username, password):
