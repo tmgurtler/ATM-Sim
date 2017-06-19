@@ -1,5 +1,4 @@
-
-# A very simple Flask Hello World app for you to get started with...
+# Python code to handle the server of the ATM logging webapp
 
 from flask import Flask, render_template, url_for, request, redirect, Response
 import sqlite3
@@ -7,10 +6,11 @@ import shortuuid
 from flask_sslify import SSLify
 from functools import wraps
 
-
 app = Flask(__name__)
 sslify = SSLify(app)
+pythonanywhere_username = 'tgurtler'
 
+# REWRITE AS A ~POST~ WITH SPECIFIC FIELDS
 @app.route('/save/<attempt>')
 def save(attempt):
     conn = sqlite3.connect('attempts.db')
@@ -20,36 +20,44 @@ def save(attempt):
     conn.close()
     return attempt
 
+# REWRITE FOR THE ACTUAL DATABASES WE WANT
 @app.route('/create_db')
 def setup():
     conn = sqlite3.connect('attempts.db')
     c = conn.cursor()
-    #c.execute('DROP TABLE IF EXISTS attempts')
+    # c.execute('DROP TABLE IF EXISTS attempts')
     c.execute('CREATE TABLE attempts (attempt)')
-    #c.execute('DROP TABLE IF EXISTS passwords')
-    #c.execute('CREATE TABLE passwords (password)')
-    #c.execute('DROP TABLE IF EXISTS uids')
+    # c.execute('DROP TABLE IF EXISTS passwords')
+    # c.execute('CREATE TABLE passwords (password)')
+    # c.execute('DROP TABLE IF EXISTS uids')
     c.execute('CREATE TABLE uids (uid, email)') # uid, email, password
     conn.commit()
     conn.close()
     return "OK"
 
-'''
-@app.route('/reset_attempts')
-def reset():
-    conn = sqlite3.connect('attempts.db')
-    c = conn.cursor()
-    c.execute('DROP TABLE IF EXISTS attempts')
-    c.execute('CREATE TABLE attempts (attempt)')
-    conn.commit()
-    conn.close()
-    return "OK"
-'''
+##
+# ONLY REACTIVATE IF WE WANT TO BE ABLE TO NUKE DATABASE AT WILL (BAD IDEA)
+#
+# @app.route('/reset_attempts')
+# def reset():
+#     conn = sqlite3.connect('attempts.db')
+#     c = conn.cursor()
+#     c.execute('DROP TABLE IF EXISTS attempts')
+#     c.execute('CREATE TABLE attempts (attempt)')
+#     conn.commit()
+#     conn.close()
+#     return "OK"
 
-@app.route('/over')
-def over():
-    return render_template('over.html')
+@app.route('/end')
+def end():
+    return render_template('end.html')
 
+##
+# With a GET request, this will display the prompt to enter a User ID. When entered, it will POST to itself to generate the link to go to
+#
+# With a POST request, this will find the internal representation of the ID, and generate a link for a unique experiment from it
+#
+# (I don't think this needs edited much, although the underlying DB might change)
 @app.route('/get_uid', methods=['GET', 'POST'])
 def get_uid():
     result = ''
@@ -64,16 +72,12 @@ def get_uid():
             vars = res[0]
         else:
             uid = shortuuid.uuid()[:5]
-            #c.execute('SELECT password FROM passwords LIMIT 1')
-            #password = c.fetchone()
-            #c.execute('DELETE FROM passwords WHERE password=?', (password))
             c.execute('INSERT INTO uids VALUES (?,?)', (uid, email))
             conn.commit()
             vars = uid
-        result = 'Your URL to access the experiment is <a href=".{}">dantt.pythonanywhere.com{}</a>'.format(url_for('experiment', uid=vars), url_for('experiment', uid=vars))
+        result = 'Your URL to access the experiment is <a href=".{}">'.format(url_for('experiment', uid=vars)) + pythonanywhere_username + '.pythonanywhere.com{}</a>'.format(url_for('experiment', uid=vars))
         conn.close()
     return render_template('uid.html', result=result)
-
 
 def check_auth(username, password):
     """This function is called to check if a username /
@@ -97,6 +101,7 @@ def requires_auth(f):
         return f(*args, **kwargs)
     return decorated
 
+# Note that currently, "attempts" is just a huge list of JSON strings. Can we improve this?
 @app.route('/download')
 @requires_auth
 def download():
@@ -107,6 +112,8 @@ def download():
     conn.close()
     return str(res)
 
+# Confirms that User ID is valid, and renders the experiment for them.
+# Shouldn't change unless we change that underlying DB
 @app.route('/experiment/<uid>')
 def experiment(uid):
     conn = sqlite3.connect('attempts.db')
