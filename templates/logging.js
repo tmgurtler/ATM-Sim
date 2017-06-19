@@ -26,7 +26,7 @@ switch(true) {
     break;
 
     default:
-    window.location.replace("http://tgurtler.pythonanywhere.com/over");
+    window.location.replace("http://tgurtler.pythonanywhere.com/end");
 }
 
 document.getElementById("typeToContinue").innerHTML = pwdToCheck;
