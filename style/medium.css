@@ -1,0 +1,49 @@
+.google-header-bar.centered {
+    height: 83px;
+}
+
+.google-header-bar.centered .header .logo {
+    margin: 25px auto 20px;
+}
+
+.card {
+    margin-bottom: 20px;
+}
+
+.banner h1 {
+    font-size: 38px;
+    margin-bottom: 15px;
+}
+
+.banner h2 {
+    margin-bottom: 15px;
+}
+
+.one-google p.create-account,
+.one-google p.switch-account {
+    margin-bottom: 30px;
+}
+
+.signin-card #Email {
+    margin-bottom: 0;
+}
+
+.signin-card #Passwd {
+    margin-top: -1px;
+}
+
+.signin-card #Email.form-error,
+.signin-card #Passwd.form-error {
+    z-index: 2;
+}
+
+.signin-card #Email:hover,
+.signin-card #Email:focus,
+.signin-card #Passwd:hover,
+.signin-card #Passwd:focus {
+    z-index: 3;
+}
+
+.dasher-tooltip {
+    top: 340px;
+}
