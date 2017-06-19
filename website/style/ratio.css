@@ -1,0 +1,11 @@
+.header .logo {
+    background-image: url(https://ssl.gstatic.com/accounts/ui/logo_2x.png);
+}
+
+.header .logo-w {
+    background-image: url(https://ssl.gstatic.com/images/branding/googlelogo/2x/googlelogo_color_112x36dp.png);
+}
+
+.one-google .logo-strip {
+    background-image: url(https://ssl.gstatic.com/accounts/ui/wlogostrip_230x17_2x.png);
+}

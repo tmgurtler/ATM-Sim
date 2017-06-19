@@ -1,0 +1,19 @@
+<html>
+    <head>
+        <title>Projector Experiment</title>
+    </head>
+    
+    <body>
+        {% if err %}
+            <p style='color:red'>Your ID is wrong! Please retrieve it here by typing your Subject ID</p>
+        {% endif %}
+
+        <form method='post'>
+            <label for="email">Subject ID:</label>
+            <input type="text" id="email" name="email">
+            <button type="submit">Submit</button>
+        </form>
+        
+        {{ result|safe }}
+    </body>
+</html>
