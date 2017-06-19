@@ -6,10 +6,10 @@
         
         <title>NYIT ATM</title>
 
-        <link rel="stylesheet" type="text/css" href="style/main.css">
-        <link rel="stylesheet" type="text/css" media="screen and (max-width: 800px), screen and (max-height: 800px)" href="style/medium.css">
-        <link rel="stylesheet" type="text/css" media="screen and (max-width: 580px)" href="style/small.css">
-        <link rel="stylesheet" type="text/css" media="screen and (-webkit-min-device-pixel-ratio: 1.5), (min--moz-device-pixel-ratio: 1.5), (-o-min-device-pixel-ratio: 3 / 2), (min-device-pixel-ratio: 1.5)" href="style/ratio.css">
+        <link rel="stylesheet" type="text/css" href="/style/main.css">
+        <link rel="stylesheet" type="text/css" media="screen and (max-width: 800px), screen and (max-height: 800px)" href="/style/medium.css">
+        <link rel="stylesheet" type="text/css" media="screen and (max-width: 580px)" href="/style/small.css">
+        <link rel="stylesheet" type="text/css" media="screen and (-webkit-min-device-pixel-ratio: 1.5), (min--moz-device-pixel-ratio: 1.5), (-o-min-device-pixel-ratio: 3 / 2), (min-device-pixel-ratio: 1.5)" href="/style/ratio.css">
 
         <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     </head>
@@ -58,22 +58,6 @@
                             </div>
 
                             <input id="signIn" onclick="checkPWD()" name="signIn" class="rc-button rc-button-submit" type="button" value="Sign in"> <!-- submit -->
-                  
-                            <label class="hidden remember">
-                                <input class="hidden" id="PersistentCookie" name="PersistentCookie" type="checkbox" value="yes" checked="checked">
-                          
-                                <span class="hidden">
-                                    Stay signed in
-                                </span>
-                          
-                                <div class="bubble-wrap" role="tooltip">
-                                    <div class="bubble-pointer"></div>
-                                    <div class="bubble">
-                                        For your convenience, keep this checked. On shared devices, additional precautions are recommended.
-                                        <a href="https://support.google.com/accounts/?p=securesignin&amp;hl=en" target="_blank">Learn more</a>
-                                    </div>
-                                </div>
-                            </label>
 
                             <input class="hidden" type="hidden" name="rmShown" value="1">
                   
@@ -83,41 +67,27 @@
                         </form>
                     </div>
 
-                    <div class="card-mask-wrap shift-form">
-                        <div class="card-mask">
-                            <div class="one-google">
-                                <p class="create-account">
-              
-                                    <span id="link-signin-different">
-                                        <a href="#">
-                                            This webpage collects user data for a scientific experiment by NYIT, UIUC, RIT, and BMC.
+                    <div class="hidden">
+                        <center>
+                            <p style ="font-size: 25px;" id="timeLbl"></p>
+                            <p id="result" style ="font-size: 25px;">Session: <span id="session">Training</span> - Attempt: <span id="attempt">1</span></p>
+                            <textarea id="textLog" style="width:90%; height:200px"></textarea>
+                            <!-- <input type="button" id="btnConvert" value="Converti" onclick="convert()" />  -->
+                            <input type="button" onclick="location.href='results.html';" id="btnShowResults" value="See results"/>
+                        </center>
 
-                                            By participating in the experiment and interacting with this webpage, you agree that information about the timing with which you pressed the keys of your keyboard will be collected. No other personal information is gathered. Data is securely and anonymously collected on a secure database. <br><br>
-                                            NEVER TYPE YOUR REAL PINs HERE! INPUT ONLY THE PIN GIVEN TO PERFORM THE EXPERIMENT!
-                                        </a>
-                                    </span>
-                                    
-                                    <span id="link-signup">
-                                        <a href="#">
-                                        </a>
-                                    </span>
-                                </p>
+                        <br />
+                        
+                        <center>
+                            <input type="button" onclick="clearLS()" id="btnClear" value="Clear LS"/>
+                        </center>
+                    </div>
 
-                                <div class="hidden">
-                                    <center>
-                                        <p style ="font-size: 25px;" id="timeLbl"></p>
-                                        <p id="result" style ="font-size: 25px;">Session: <span id="session">Training</span> - Attempt: <span id="attempt">1</span></p>
-                                        <textarea id="textLog" style="width:90%; height:200px"></textarea>
-                                        <!-- <input type="button" id="btnConvert" value="Converti" onclick="convert()" />  -->
-                                        <input type="button" onclick="location.href='results.html';" id="btnShowResults" value="See results"/>
-                                    </center>
-                                    <br />
-                                    <center>
-                                        <input type="button" onclick="clearLS()" id="btnClear" value="Clear LS"/>
-                                    </center>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="google-footer-bar">
+                        This webpage collects user data for a scientific experiment by NYIT, UIUC, RIT, and BMC.
+
+                        By participating in the experiment and interacting with this webpage, you agree that information about the timing with which you pressed the keys of your keyboard will be collected. No other personal information is gathered. Data is securely and anonymously collected on a secure database. <br><br>
+                        NEVER TYPE YOUR REAL PINs HERE! INPUT ONLY THE PIN GIVEN TO PERFORM THE EXPERIMENT!
                     </div>
                 </div>
             </div>
