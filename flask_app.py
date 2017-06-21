@@ -177,9 +177,6 @@ def experiment(userString):
     numThruSet = int(request.form['numThruSet'])
     numThruPin = int(request.form['numThruPin'])
     
-    if len(orderString) == 0:
-        return redirect(url_for('end'), userString=userString)
-    
     if numThruPin == -1:
         return render_template('pinDisplay.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numThruPin=0)
     elif numThruPin == 3:
@@ -187,7 +184,10 @@ def experiment(userString):
         orderString = orderString[1:]
         if len(holdString) == 5:
             if numThruSet == 2:
-                return render_template('breakDisplay.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString="", numThruSet=0, numThruPin=(-1))
+                if len(orderString) == 0:
+                    return redirect(url_for('end', userString=userString))
+                else:
+                    return render_template('breakDisplay.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString="", numThruSet=0, numThruPin=(-1))
             else:
                 return render_template('breakDisplay.html', userString=userString, setNumber=setNumber, orderString=(holdString + orderString), holdString="", numThruSet=(numThruSet + 1), numThruPin=(-1))
         else:
