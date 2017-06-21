@@ -60,10 +60,10 @@ def setup():
     c.execute('CREATE TABLE userStrings (userID integer PRIMARY KEY, userString text NOT NULL UNIQUE)')
 
     c.execute('DROP TABLE IF EXISTS subjects')
-    c.execute('CREATE TABLE subjects (userString text PRIMARY KEY, group text NOT NULL, attempts integer NOT NULL)')
+    c.execute('CREATE TABLE subjects (userString text PRIMARY KEY, groupLabel text NOT NULL, attempts integer NOT NULL)')
 
     c.execute('DROP TABLE IF EXISTS attempts')
-    c.execute('CREATE TABLE attempts (id integer PRIMARY KEY, userString text NOT NULL, pinAttempted text NOT NULL, keyPressed text NOT NULL, time text NOT NULL')
+    c.execute('CREATE TABLE attempts (id integer PRIMARY KEY, userString text NOT NULL, pinAttempted text NOT NULL, keyPressed text NOT NULL, time text NOT NULL)')
 
     conn.commit()
 

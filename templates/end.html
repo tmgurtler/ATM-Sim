@@ -7,7 +7,6 @@
         <title>NYIT ATM</title>
 
         <link rel="stylesheet" type="text/css" href="/style/main.css">
-        <script type="text/javascript" src="/script/common.js"></script>
     </head>
 
     <body onload="timer()">
@@ -17,9 +16,13 @@
     </body>
 
     <script>
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
         async function timer() {
             await sleep(5000);
-            postAndFollow('/', {}, "get");
+            window.location.replace('/end/{{ userString }}');
         }
     </script>
 </html>

@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <script type="javascript/text" src="/script/common.js"></script>
-    </head>
     <body>
+        <form id="onlythinghere" method="POST" action="/experiment/{{ userString }}">
+            <input type="hidden" name="setNumber" value="{{ setNumber }}">
+            <input type="hidden" name="orderString" value="{{ orderString }}">
+            <input type="hidden" name="holdString" value="{{ holdString }}">
+            <input type="hidden" name="numThruSet" value="{{ numThruSet }}">
+            <input type="hidden" name="numThruPin" value="{{ numThruPin }}">
+        </form>
+
         <script>
-            postAndFollow('/experiment/{{ userString }}', {setNumber: "{{ setNumber }}", orderString: "{{ orderString }}", holdString: "{{ holdString }}", numThruSet: "{{ numThruSet }}", numThruPin: "{{ numThruPin }}"})
+            form = document.getElementById("onlythinghere");
+            form.submit();
         </script>
     </body>
 </html>

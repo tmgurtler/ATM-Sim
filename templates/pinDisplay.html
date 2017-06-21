@@ -7,8 +7,6 @@
         <title>NYIT ATM</title>
 
         <link rel="stylesheet" type="text/css" href="/style/main.css">
-
-        <script type="text/javascript" src="/script/common.js"></script>
     </head>
 
     <body onload="timer()">
@@ -29,10 +27,23 @@
             </div>
         </div>
 
+        <form id="sender" method="POST" action="/experiment/{{ userString }}">
+            <input type="hidden" name="setNumber" value="{{ setNumber }}">
+            <input type="hidden" name="orderString" value="{{ orderString }}">
+            <input type="hidden" name="holdString" value="{{ holdString }}">
+            <input type="hidden" name="numThruSet" value="{{ numThruSet }}">
+            <input type="hidden" name="numThruPin" value="{{ numThruPin }}">
+        </form>
+
         <script>
+            function sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
             async function timer() {
                 await sleep(4000);
-                postAndFollow('/experiment/{{ userString }}', {setNumber: "{{ setNumber }}", orderString: "{{ orderString }}", holdString: "{{ holdString }}", numThruSet: "{{ numThruSet }}", numThruPin: "{{ numThruPin }}"});
+                form = document.getElementById("onlythinghere");
+                form.submit();
             }
 
             var setNumber = {{ setNumber }}; 

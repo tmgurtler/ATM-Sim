@@ -7,7 +7,6 @@
         <link rel="stylesheet" type="text/css" href="/style/main.css">
 
         <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-        <script src="/script/common.js"></script>
     </head>
 
     <body oncopy="return false" oncut="return false" onpaste="return false" onload="start()" cz-shortcut-listen="true">
@@ -42,6 +41,14 @@
                 </div>
             </div>
         </div>
+
+        <form id="sender" method="POST" action="/experiment/{{ userString }}">
+            <input type="hidden" name="setNumber" value="{{ setNumber }}">
+            <input type="hidden" name="orderString" value="{{ orderString }}">
+            <input type="hidden" name="holdString" value="{{ holdString }}">
+            <input type="hidden" name="numThruSet" value="{{ numThruSet }}">
+            <input type="hidden" name="numThruPin" value="{{ numThruPin }}">
+        </form>
 
         <script>
             function start() {
@@ -79,7 +86,7 @@
             });
 
             function quitEarly() {
-                postAndFollow('/end/{{ userString }}', {}, 'get');
+                window.location.replace('/end/{{ userString }}');
             }
 
             function verifyAndSubmit() {
@@ -96,7 +103,8 @@
                     var nextPin = -1;
                 }
 
-                postAndFollow('/experiment/{{ userString }}', { setNumber: "{{ setNumber }}", orderString: "{{ orderString }}", holdString: "{{ holdString }}", numThruSet: "{{ numThruSet }}", numThruPin: nextPin.toString() });
+                form = document.getElementById("onlythinghere");
+                form.submit();
             }
         </script>
     </body>
