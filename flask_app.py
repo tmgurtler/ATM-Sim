@@ -154,7 +154,7 @@ def verify(userString):
             setNumber = attempts
         elif group == "B":
             setNumber = (attempts + 1) % 3
-        else
+        else:
             setNumber = (attempts + 2) % 3
 
         orderString = [chr(x) for x in range(ord('a'), ord('a') + 15)]
