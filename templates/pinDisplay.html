@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta content="width=300, initial-scale=1" name="viewport">
+        
+        <title>NYIT ATM</title>
+
+        <link rel="stylesheet" type="text/css" href="/style/main.css">
+
+        <script type="text/javascript" src="/script/common.js"></script>
+    </head>
+
+    <body onload="timer()">
+        <div class="wrapper">
+            <div class="main content clearfix">
+                <div class="banner">
+                    <h1>
+                        Your PIN is <b id="typeToContinue" style="font-family:monospace;"></b>
+                    </h1>
+                </div>
+                
+                <div class="google-footer-bar">
+                    This webpage collects user data for a scientific experiment by NYIT, UIUC, RIT, and BMC.
+
+                    By participating in the experiment and interacting with this webpage, you agree that information about the timing with which you pressed the keys of your keyboard will be collected. No other personal information is gathered. Data is securely and anonymously collected on a secure database. <br><br>
+                    NEVER TYPE YOUR REAL PINs HERE! INPUT ONLY THE PIN GIVEN TO PERFORM THE EXPERIMENT!
+                </div>
+            </div>
+        </div>
+
+        <script>
+            async function timer() {
+                await sleep(4000);
+                postAndFollow('/experiment/{{ userString }}', {setNumber: "{{ setNumber }}", orderString: "{{ orderString }}", holdString: "{{ holdString }}", numThruSet: "{{ numThruSet }}", numThruPin: "{{ numThruPin }}"});
+            }
+
+            var setNumber = {{ setNumber }}; 
+            var orderString = "{{ orderString }}";
+            var specificPIN = orderString.charCodeAt(0) - "a".charCodeAt(0);
+            
+            document.getElementById("typeToContinue").innerHTML = pinsets[setNumber][specificPIN];
+        </script>
+    </body>
+</html>

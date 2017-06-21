@@ -1,6 +1,7 @@
 # Python code to handle the server of the ATM logging webapp
 
 from flask import Flask, render_template, url_for, request, redirect, Response
+from random import shuffle
 import sqlite3
 import shortuuid
 from flask_sslify import SSLify
@@ -8,30 +9,42 @@ from functools import wraps
 
 app = Flask(__name__)
 sslify = SSLify(app)
-pythonanywhere_username = 'tgurtler'
 
 # REWRITE AS A ~POST~ WITH SPECIFIC FIELDS
-@app.route('/save/<attempt>')
-def save(attempt):
+@app.route('/save', methods=["POST"])
+def save():
+    userString = request.form["userString"]
+    pinAttempted = request.form["pinAttempted"]
+    keyPressed = request.form["keyPressed"]
+    time = request.form["time"]
+    
     conn = sqlite3.connect('attempts.db')
     c = conn.cursor()
-    c.execute('INSERT INTO attempts VALUES (?)', (attempt,))
+
+    c.execute('INSERT INTO attempts (userString, pinAttempted, keyPressed, time) VALUES (?, ?, ?, ?)', (userString, pinAttempted, keyPressed, time))
     conn.commit()
     conn.close()
-    return attempt
+    
+    return "You shouldn't be here. :("
 
 # REWRITE FOR THE ACTUAL DATABASES WE WANT
 @app.route('/create_db')
+@requires_auth
 def setup():
     conn = sqlite3.connect('attempts.db')
     c = conn.cursor()
-    # c.execute('DROP TABLE IF EXISTS attempts')
-    c.execute('CREATE TABLE attempts (attempt)')
-    # c.execute('DROP TABLE IF EXISTS passwords')
-    # c.execute('CREATE TABLE passwords (password)')
-    # c.execute('DROP TABLE IF EXISTS uids')
-    c.execute('CREATE TABLE uids (uid, email)') # uid, email, password
+
+    c.execute('DROP TABLE IF EXISTS userStrings')
+    c.execute('CREATE TABLE userStrings (userID integer PRIMARY KEY, userString text NOT NULL UNIQUE)')
+
+    c.execute('DROP TABLE IF EXISTS subjects')
+    c.execute('CREATE TABLE subjects (userString text PRIMARY KEY, group text NOT NULL, attempts integer NOT NULL)')
+
+    c.execute('DROP TABLE IF EXISTS attempts')
+    c.execute('CREATE TABLE attempts (id integer PRIMARY KEY, userString text NOT NULL, pinAttempted text NOT NULL, keyPressed text NOT NULL, time text NOT NULL')
+
     conn.commit()
+
     conn.close()
     return "OK"
 
@@ -48,8 +61,20 @@ def setup():
 #     conn.close()
 #     return "OK"
 
-@app.route('/end')
-def end():
+@app.route('/end/<userString>')
+def end(userString):
+    conn = sqlite3.connect('attempts.db')
+    c = conn.cursor()
+
+    c.execute('SELECT * FROM subjects WHERE userString=?', (userString,))
+    (userString, group, attempts) = c.fetchone()
+
+    attempts += 1
+
+    c.execute('UPDATE subjects SET attempts=? WHERE userString=?', (attempts, userString))
+    conn.commit()
+    conn.close()    
+
     return render_template('end.html')
 
 ##
@@ -61,24 +86,25 @@ def end():
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/get_uid', methods=['GET', 'POST'])
 def get_uid():
-    result = ''
-    vars = ''
     if request.method == 'POST':
-        email = request.form['userID']
+        userID = request.form['userID']
         conn = sqlite3.connect('attempts.db')
         c = conn.cursor()
-        c.execute('SELECT uid FROM uids where email=?', (email,))
+        
+        c.execute('SELECT userString FROM userStrings where userID=?', (userID,))
         res = c.fetchone()
+        
         if res:
-            vars = res[0]
+            userString = res[0]
         else:
-            uid = shortuuid.uuid()[:5]
-            c.execute('INSERT INTO uids VALUES (?,?)', (uid, email))
+            userString = shortuuid.uuid()[:5]
+            c.execute('INSERT INTO userStrings (userID, userString) VALUES (?,?)', (userID, userString))
             conn.commit()
-            vars = uid
+        
         conn.close()
-        return redirect(url_for('experiment', uid=vars))
-    return render_template('uid.html', result=result)
+        return redirect(url_for('verify', userString=userString))
+    else:
+        return render_template('uid.html')
 
 def check_auth(username, password):
     """This function is called to check if a username /
@@ -113,15 +139,60 @@ def download():
     conn.close()
     return str(res)
 
-# Confirms that User ID is valid, and renders the experiment for them.
-# Shouldn't change unless we change that underlying DB
-@app.route('/experiment/<uid>')
-def experiment(uid):
+# Confirms that User ID is valid and sets up experiment variables
+@app.route('/verify/<userString>')
+def verify(userString):
     conn = sqlite3.connect('attempts.db')
     c = conn.cursor()
-    c.execute('SELECT uid FROM uids where uid=?', (uid,))
+    c.execute('SELECT * FROM subjects where userString=?', (userString,))
     res = c.fetchone()
+
     if res:
-        return render_template('experiment.html', uid=uid)
+        (userString, group, attempts) = res
+        
+        if group == "A":
+            setNumber = attempts
+        elif group == "B":
+            setNumber = (attempts + 1) % 3
+        else
+            setNumber = (attempts + 2) % 3
+
+        orderString = [chr(x) for x in range(ord('a'), ord('a') + 15)]
+        shuffle(orderString)
+        orderString = ''.join(orderString)
+        
+        conn.close()
+        return render_template('redirect.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString="", numThruSet=0, numThruPin=(-1))
     else:
+        conn.close()
         return redirect(url_for('get_uid'))
+
+# Renders experiment pages
+# note: although most rerouting happens here, this does expect that numThruPin gets set properly on pinEntry.html
+@app.route('/experiment/<userString>', methods=['POST'])
+def experiment(userString):
+    setNumber = int(request.form['setNumber'])
+    orderString = request.form['orderString']
+    holdString = request.form['holdString']
+    numThruSet = int(request.form['numThruSet'])
+    numThruPin = int(request.form['numThruPin'])
+    
+    if len(orderString) == 0:
+        return redirect(url_for('end'), userString=userString)
+    
+    if numThruPin == -1:
+        return render_template('pinDisplay.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numThruPin=0)
+    elif numThruPin == 3:
+        holdString += orderString[0]
+        orderString = orderString[1:]
+        if len(holdString) == 5:
+            if numThruSet == 2:
+                return render_template('breakDisplay.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString="", numThruSet=0, numThruPin=(-1))
+            else:
+                return render_template('breakDisplay.html', userString=userString, setNumber=setNumber, orderString=(holdString + orderString), holdString="", numThruSet=(numThruSet + 1), numThruPin=(-1))
+        else:
+            return render_template('redirect.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numThruPin=(-1))
+    else:
+        return render_template('pinEntry.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numThruPin=numThruPin)
+
+    

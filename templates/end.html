@@ -1,16 +1,25 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
     <head>
-        <title>Projector Experiment</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta content="width=300, initial-scale=1" name="viewport">
+        
+        <title>NYIT ATM</title>
+
+        <link rel="stylesheet" type="text/css" href="/style/main.css">
+        <script type="text/javascript" src="/script/common.js"></script>
     </head>
 
-    <body>
-        <p>Session is over, thank you for you collaboration</p>
-        <a onclick="clearLS()" href="https://tgurtler.pythonanywhere.com/get_uid">Start again</a>
+    <body onload="timer()">
+        <div class="banner">
+            <h1>Thank you! The session is now over.</h1>
+        </div>
     </body>
 
     <script>
-        function clearLS() {
-            localStorage.clear();
+        async function timer() {
+            await sleep(5000);
+            postAndFollow('/', {}, "get");
         }
     </script>
 </html>

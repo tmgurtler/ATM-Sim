@@ -1,0 +1,103 @@
+<html lang="en"><head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta content="width=300, initial-scale=1" name="viewport">
+        
+        <title>NYIT ATM</title>
+
+        <link rel="stylesheet" type="text/css" href="/style/main.css">
+
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script src="/script/common.js"></script>
+    </head>
+
+    <body oncopy="return false" oncut="return false" onpaste="return false" onload="start()" cz-shortcut-listen="true">
+        <div class="wrapper">
+            <div class="main content clearfix">
+                <div id="success-alert" class="alert">
+                    <b>Good!</b> The typed PIN is correct!
+                </div>
+      
+                <div class="main-content shift-form">
+                    <div class="card signin-card shift-form">
+                        <h2 id="instruction">Please input the PIN, then press ENTER.</h2>
+
+                        <form method="" action="" id="pinForm">
+                            <div class="form-panel second">
+                                <input id="pin" name="pin" type="password" onkeypress="record(event)" autofocus>
+                            </div>
+
+                            <input id="signIn" onclick="verifyAndSubmit()" name="signIn" class="rc-button rc-button-submit" type="button" value="ENTER">
+                            <input id="quit" onclick="quitEarly()" class="rc-button rc-button-quit" type="button" value="QUIT">
+
+                            <input class="hidden" type="hidden" name="rmShown" value="1">
+                        </form>
+                    </div>
+
+                    <div class="google-footer-bar">
+                        This webpage collects user data for a scientific experiment by NYIT, UIUC, RIT, and BMC.
+
+                        By participating in the experiment and interacting with this webpage, you agree that information about the timing with which you pressed the keys of your keyboard will be collected. No other personal information is gathered. Data is securely and anonymously collected on a secure database. <br><br>
+                        NEVER TYPE YOUR REAL PINs HERE! INPUT ONLY THE PIN GIVEN TO PERFORM THE EXPERIMENT!
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function start() {
+                printAlerts({{ numThruPin }});
+            }
+
+            function printAlerts(numThruPin) {
+                var success = document.getElementById("success-alert");
+                var curl = window.location.href;
+                
+                if (numThruPin != 0) {
+                     success.style.visibility = "visible";
+                }
+            }
+
+            var setNumber = {{ setNumber }}; 
+            var orderString = "{{ orderString }}";
+            var specificPIN = orderString.charCodeAt(0) - "a".charCodeAt(0);
+            var numThruPin = {{ numThruPin }};
+            var activePIN = pinsets[setNumber][specificPIN];
+
+            function record(event) {
+                var n = new Date();
+                var timeString = n.toISOString();
+                var keypress = event.keyCode;
+
+                $.post( "/save", { userString: "{{ userString }}", pinAttempted: activePIN, keyPressed: fromCharCode(keypress), time: timeString} );
+            }
+
+            document.getElementById("pin").addEventListener("keyup", function(event) {
+                event.preventDefault();
+                if (event.keyCode == 13) {
+                    document.getElementById("signIn").click();
+                }
+            });
+
+            function quitEarly() {
+                postAndFollow('/end/{{ userString }}', {}, 'get');
+            }
+
+            function verifyAndSubmit() {
+                var n = new Date();
+                var timeString = n.toISOString();
+                var enteredPIN = document.getElementById("pin").value;
+
+                $.post( "/save", { userString: "{{ userString }}", pinAttempted: activePIN, keyPressed: "\n", time: timeString} );
+
+                if (enteredPIN == activePIN) {
+                    var nextPin = numThruPin + 1;
+                }
+                else {
+                    var nextPin = -1;
+                }
+
+                postAndFollow('/experiment/{{ userString }}', { setNumber: "{{ setNumber }}", orderString: "{{ orderString }}", holdString: "{{ holdString }}", numThruSet: "{{ numThruSet }}", numThruPin: nextPin.toString() });
+            }
+        </script>
+    </body>
+</html>

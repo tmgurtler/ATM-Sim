@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta content="width=300, initial-scale=1" name="viewport">
+        
+        <title>NYIT ATM</title>
+
+        <link rel="stylesheet" type="text/css" href="/style/main.css">
+
+        <script type="text/javascript" src="/script/common.js"></script>
+    </head>
+
+    <body onload="timer()">
+        <div class="wrapper">
+            <div class="main content clearfix">
+                <div class="banner">
+                    <h1>
+                        Please take a break! More pins will appear in <b id="waitToContinue" style="font-family:monospace;"></b> seconds.
+                    </h1>
+                </div>
+                
+                <div class="google-footer-bar">
+                    This webpage collects user data for a scientific experiment by NYIT, UIUC, RIT, and BMC.
+
+                    By participating in the experiment and interacting with this webpage, you agree that information about the timing with which you pressed the keys of your keyboard will be collected. No other personal information is gathered. Data is securely and anonymously collected on a secure database. <br><br>
+                    NEVER TYPE YOUR REAL PINs HERE! INPUT ONLY THE PIN GIVEN TO PERFORM THE EXPERIMENT!
+                </div>
+            </div>
+        </div>
+
+        <script>
+            var startTime = new Date().getTime();
+
+            async function timer() {
+                await sleep(15000);
+                postAndFollow('/experiment/{{ userString }}', {setNumber: "{{ setNumber }}", orderString: "{{ orderString }}", holdString: "{{ holdString }}", numThruSet: "{{ numThruSet }}", numThruPin: "{{ numThruPin }}"});
+            }
+
+            var x = setInterval(function() {
+                // get the current time
+                var now = new Date().getTime();
+
+                // Find the distance between now and when we started
+                var distance = now - startTime;
+
+                // put it in human-legible stuff
+                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                // Display the result in the element with id="waitToContinue"
+                document.getElementById("waitToContinue").innerHTML = (15 - seconds);
+            }, 1000);
+        </script>
+    </body>
+</html>
