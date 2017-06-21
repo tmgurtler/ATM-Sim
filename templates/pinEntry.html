@@ -20,7 +20,7 @@
                     <div class="card signin-card shift-form">
                         <h2 id="instruction">Please input the PIN, then press ENTER.</h2>
 
-                        <form method="" action="" id="pinForm">
+                        <form method="" action="javascript:" id="pinForm">
                             <div class="form-panel second">
                                 <input id="pin" name="pin" type="password" onkeypress="record(event)" autofocus>
                             </div>
@@ -47,10 +47,16 @@
             <input type="hidden" name="orderString" value="{{ orderString }}">
             <input type="hidden" name="holdString" value="{{ holdString }}">
             <input type="hidden" name="numThruSet" value="{{ numThruSet }}">
-            <input type="hidden" name="numThruPin" value="{{ numThruPin }}">
+            <input id="pendingInput" type="hidden" name="numThruPin" value="">
         </form>
 
         <script>
+            pinsets = [
+                [1256, 9854, 0759, 3575, 1793, 9713, 4069, 9274, 1973, 3791, 2002, 0220, 1032, 3012, 9999],
+                [7854, 6589, 1570, 0953, 2871, 4697, 7614, 3496, 3719, 9173, 2075, 5902, 8103, 8301, 1111],
+                [2589, 9632, 2685, 8425, 5005, 7997, 3843, 1861, 9137, 7319, 4209, 7026, 1039, 3013, 5555]
+            ];
+
             function start() {
                 printAlerts({{ numThruPin }});
             }
@@ -75,7 +81,7 @@
                 var timeString = n.toISOString();
                 var keypress = event.keyCode;
 
-                $.post( "/save", { userString: "{{ userString }}", pinAttempted: activePIN, keyPressed: fromCharCode(keypress), time: timeString} );
+                $.post( "/save", { userString: "{{ userString }}", pinAttempted: activePIN, keyPressed: String.fromCharCode(keypress), time: timeString} );
             }
 
             document.getElementById("pin").addEventListener("keyup", function(event) {
@@ -96,14 +102,15 @@
 
                 $.post( "/save", { userString: "{{ userString }}", pinAttempted: activePIN, keyPressed: "\n", time: timeString} );
 
+                var nextPinUp = document.getElementById("pendingInput");
                 if (enteredPIN == activePIN) {
-                    var nextPin = numThruPin + 1;
+                    nextPinUp.value = (numThruPin + 1).toString();
                 }
                 else {
-                    var nextPin = -1;
+                    nextPinUp.value = (-1).toString();
                 }
 
-                form = document.getElementById("onlythinghere");
+                form = document.getElementById("sender");
                 form.submit();
             }
         </script>

@@ -36,21 +36,27 @@
         </form>
 
         <script>
+            pinsets = [
+                [1256, 9854, 0759, 3575, 1793, 9713, 4069, 9274, 1973, 3791, 2002, 0220, 1032, 3012, 9999],
+                [7854, 6589, 1570, 0953, 2871, 4697, 7614, 3496, 3719, 9173, 2075, 5902, 8103, 8301, 1111],
+                [2589, 9632, 2685, 8425, 5005, 7997, 3843, 1861, 9137, 7319, 4209, 7026, 1039, 3013, 5555]
+            ];
+
             function sleep(ms) {
                 return new Promise(resolve => setTimeout(resolve, ms));
             }
 
             async function timer() {
                 await sleep(4000);
-                form = document.getElementById("onlythinghere");
+                form = document.getElementById("sender");
                 form.submit();
             }
 
             var setNumber = {{ setNumber }}; 
             var orderString = "{{ orderString }}";
             var specificPIN = orderString.charCodeAt(0) - "a".charCodeAt(0);
-            
-            document.getElementById("typeToContinue").innerHTML = pinsets[setNumber][specificPIN];
+
+            document.getElementById("typeToContinue").innerHTML = ("0000" + (pinsets[setNumber][specificPIN]).toString()).slice(-4);
         </script>
     </body>
 </html>
