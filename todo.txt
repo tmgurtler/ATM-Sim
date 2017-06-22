@@ -1,2 +1,2 @@
-Welcome screen
 Practice PIN entry screen
+better interaction with database through web portal

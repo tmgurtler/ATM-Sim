@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta content="width=300, initial-scale=1" name="viewport">
+        
+        <title>NYIT ATM</title>
+        
+        <link rel="stylesheet" type="text/css" href="/style/main.css">
+    </head>
+    
+    <body>
+        <div class="banner">
+            <h1>Welcome! Press enter to continue.</h1>
+        </div>
+            <center>
+                <form id="onlythinghere" method="POST" action="/experiment/{{ userString }}">
+                    <input type="hidden" name="setNumber" value="{{ setNumber }}">
+                    <input type="hidden" name="orderString" value="{{ orderString }}">
+                    <input type="hidden" name="holdString" value="{{ holdString }}">
+                    <input type="hidden" name="numThruSet" value="{{ numThruSet }}">
+                    <input type="hidden" name="numThruPin" value="{{ numThruPin }}">
+                    <input type="submit" value="To the experiment!" autofocus>
+                </form>
+            </center>
+        </div>
+    </body>
+</html>

@@ -11,14 +11,8 @@
     
     <body>
         <div class="banner">
-            <h1>Please enter the user ID</h1>
+            <h1>Please enter the desired user ID and group</h1>
         </div>
-
-        {% if err %}
-            <div id="error-alert" class="alert" style="display: inline;">
-                The ID you have entered does not exist!
-            </div>
-        {% endif %}
 
         <div class="card signin-card shift-form">
             <form method="post">
@@ -26,6 +20,7 @@
                 <div class="form-panel second">
                     <label class="hidden-label" for="userID">User ID</label>
                     <input id="userID" name="userID" type="text" placeholder="User ID" autofocus>
+                    <input id="groupLabel" name="groupLabel" type="text" placeholder="A">
                 </div>
 
                 <button type="submit">Submit</button>

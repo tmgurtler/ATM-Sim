@@ -50,7 +50,7 @@ def save():
     return "You shouldn't be here. :("
 
 # REWRITE FOR THE ACTUAL DATABASES WE WANT
-@app.route('/create_db')
+@app.route('/reset_db')
 @requires_auth
 def setup():
     conn = sqlite3.connect('attempts.db')
@@ -69,6 +69,33 @@ def setup():
 
     conn.close()
     return "OK"
+
+@app.route('/make_user', methods=['GET', 'POST'])
+@requires_auth
+def get_uid():
+    if request.method == 'POST':
+        userID = request.form['userID']
+        groupLabel = request.form['groupLabel']
+
+        conn = sqlite3.connect('attempts.db')
+        c = conn.cursor()
+        
+        c.execute('SELECT userString FROM userStrings where userID=?', (userID,))
+        res = c.fetchone()
+        
+        if res:
+            userString = res[0]
+        else:
+            userString = shortuuid.uuid()[:5]
+            c.execute('INSERT INTO userStrings (userID, userString) VALUES (?,?)', (userID, userString))
+        
+        c.execute('INSERT INTO subjects (userString, groupLabel, attempts) VALUES (?, ?, ?)', (userString, groupLabel, 0))
+        conn.commit()
+        
+        conn.close()
+        return redirect(url_for('get_uid'))
+    else:
+        return render_template('user_creation.html')
 
 ##
 # ONLY REACTIVATE IF WE WANT TO BE ABLE TO NUKE DATABASE AT WILL (BAD IDEA)
@@ -119,14 +146,12 @@ def get_uid():
         if res:
             userString = res[0]
         else:
-            userString = shortuuid.uuid()[:5]
-            c.execute('INSERT INTO userStrings (userID, userString) VALUES (?,?)', (userID, userString))
-            conn.commit()
+            return render_template('uid.html', err=True)
         
         conn.close()
         return redirect(url_for('verify', userString=userString))
     else:
-        return render_template('uid.html')
+        return render_template('uid.html', err=False)
 
 # Note that currently, "attempts" is just a huge list of JSON strings. Can we improve this?
 @app.route('/download')
@@ -162,7 +187,7 @@ def verify(userString):
         orderString = ''.join(orderString)
         
         conn.close()
-        return render_template('redirect.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString="", numThruSet=0, numThruPin=(-1))
+        return render_template('welcome.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString="", numThruSet=0, numThruPin=(-1))
     else:
         conn.close()
         return redirect(url_for('get_uid'))
