@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>NYIT ATM</title>
+    </head>
+    <body>
+        {% block content %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>User String</th>
+                        <th>Pin Attempted</th>
+                        <th>Key Pressed</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attempt in res %}
+                        <tr>
+                            <td>{{ attempt[0] }}</td>
+                            <td>{{ attempt[1] }}</td>
+                            <td>{{ attempt[2] }}</td>
+                            <td>{{ attempt[3] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endblock %}
+    </body>
+</html>

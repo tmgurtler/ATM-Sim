@@ -14,7 +14,7 @@ def check_auth(username, password):
     """This function is called to check if a username /
     password combination is valid.
     """
-    return username == 'palevipr' and password == 'palevipr'
+    return username == 'correcthorsebatterystaple' and password == 'password'
 
 def authenticate():
     """Sends a 401 response that enables basic auth"""
@@ -70,9 +70,40 @@ def setup():
     conn.close()
     return "OK"
 
+@app.route('/reset_attempts')
+@requires_auth
+def reset_attempts():
+    conn = sqlite3.connect('attempts.db')
+    c = conn.cursor()
+
+    c.execute('DROP TABLE IF EXISTS attempts')
+    c.execute('CREATE TABLE attempts (id integer PRIMARY KEY, userString text NOT NULL, pinAttempted text NOT NULL, keyPressed text NOT NULL, time text NOT NULL)')
+
+    conn.commit()
+
+    conn.close()
+    return "OK"
+
+@app.route('/reset_user/<userID>')
+@requires_auth
+def reset_user(userID):
+    conn = sqlite3.connect('attempts.db')
+    c = conn.cursor()
+
+    c.execute('SELECT userString FROM userStrings WHERE userID=?', (userID,))
+    res = c.fetchone()
+    if res:
+        c.execute('UPDATE subjects SET attempts=0 WHERE userString=?', res)
+        conn.commit()
+        conn.close()
+        return "OK"
+    else:
+        conn.close()
+        return "User did not exist."
+
 @app.route('/make_user', methods=['GET', 'POST'])
 @requires_auth
-def get_uid():
+def make_user():
     if request.method == 'POST':
         userID = request.form['userID']
         groupLabel = request.form['groupLabel']
@@ -159,10 +190,12 @@ def get_uid():
 def download():
     conn = sqlite3.connect('attempts.db')
     c = conn.cursor()
-    c.execute('SELECT * FROM attempts')
+    
+    c.execute('SELECT userString, pinAttempted, keyPressed, time FROM attempts')
     res = c.fetchall()
     conn.close()
-    return str(res)
+    
+    return render_template('table.html', res=res)
 
 # Confirms that User ID is valid and sets up experiment variables
 @app.route('/verify/<userString>')
