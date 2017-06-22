@@ -11,18 +11,17 @@
     
     <body>
         <div class="banner">
-            <h1>Welcome! Press enter to continue.</h1>
+            <h1>Press enter to continue.</h1>
         </div>
-            <center>
-                <form id="onlythinghere" method="POST" action="/experiment/{{ userString }}">
-                    <input type="hidden" name="setNumber" value="{{ setNumber }}">
-                    <input type="hidden" name="orderString" value="{{ orderString }}">
-                    <input type="hidden" name="holdString" value="{{ holdString }}">
-                    <input type="hidden" name="numThruSet" value="{{ numThruSet }}">
-                    <input type="hidden" name="numThruPin" value="{{ numThruPin }}">
-                    <input type="submit" value="To the experiment!" autofocus class="rc-button rc-button-quit">
-                </form>
-            </center>
-        </div>
+        <center>
+            <form id="onlythinghere" method="POST" action="/{{ whereTo }}/{{ userString }}">
+                <input type="hidden" name="setNumber" value="{{ setNumber }}">
+                <input type="hidden" name="orderString" value="{{ orderString }}">
+                <input type="hidden" name="holdString" value="{{ holdString }}">
+                <input type="hidden" name="numThruSet" value="{{ numThruSet }}">
+                <input type="hidden" name="numThruPin" value="{{ numThruPin }}">
+                <input type="submit" value="To the experiment!" autofocus class="rc-button rc-button-quit">
+            </form>
+        </center>
     </body>
 </html>

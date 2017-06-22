@@ -220,10 +220,30 @@ def verify(userString):
         orderString = ''.join(orderString)
         
         conn.close()
-        return render_template('welcome.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString="", numThruSet=0, numThruPin=(-1))
+        return render_template('welcome.html', whereTo="practice", userString=userString, setNumber=setNumber, orderString=orderString, holdString="", numThruSet=0, numThruPin=(-1))
     else:
         conn.close()
         return redirect(url_for('get_uid'))
+
+@app.route('/continuer/<userString>', methods=['POST'])
+def continuer(userString):
+    setNumber = int(request.form['setNumber'])
+    orderString = request.form['orderString']
+    holdString = request.form['holdString']
+    numThruSet = int(request.form['numThruSet'])
+    numThruPin = int(request.form['numThruPin'])
+
+    return render_template('welcome.html', whereTo="experiment", userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numThruPin=numThruPin)
+
+@app.route('/practice/<userString>', methods=['POST'])
+def practice(userString):
+    setNumber = int(request.form['setNumber'])
+    orderString = request.form['orderString']
+    holdString = request.form['holdString']
+    numThruSet = int(request.form['numThruSet'])
+    numThruPin = int(request.form['numThruPin'])
+
+    return render_template('practice.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numThruPin=numThruPin)
 
 # Renders experiment pages
 # note: although most rerouting happens here, this does expect that numThruPin gets set properly on pinEntry.html

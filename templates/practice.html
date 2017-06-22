@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta content="width=300, initial-scale=1" name="viewport">
+        
+        <title>NYIT ATM</title>
+        
+        <link rel="stylesheet" type="text/css" href="/style/main.css">
+    </head>
+    
+    <body onload="timer()">
+        <div class="banner">
+            <h2 id="instruction">Please practice using the machine. After <b id="waitToContinue" style="font-family:monospace;">45</b> seconds, the machine will move to the next step.</h2>
+        </div>
+
+        <center>       
+            <form>
+                <textarea id="practiceArena" rows="10" cols="80" autofocus></textarea>
+            </form>
+        </center>
+            
+        <form id="sender" method="POST" action="/continuer/{{ userString }}">
+            <input type="hidden" name="setNumber" value="{{ setNumber }}">
+            <input type="hidden" name="orderString" value="{{ orderString }}">
+            <input type="hidden" name="holdString" value="{{ holdString }}">
+            <input type="hidden" name="numThruSet" value="{{ numThruSet }}">
+            <input type="hidden" name="numThruPin" value="{{ numThruPin }}">
+        </form>
+
+        <script>
+            function sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            var startTime = new Date().getTime();
+
+            async function timer() {
+                await sleep(45000);
+                form = document.getElementById("sender");
+                form.submit();
+            }
+
+            var x = setInterval(function() {
+                // get the current time
+                var now = new Date().getTime();
+
+                // Find the distance between now and when we started
+                var distance = now - startTime;
+
+                // put it in human-legible stuff
+                var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                // Display the result in the element with id="waitToContinue"
+                document.getElementById("waitToContinue").innerHTML = (45 - seconds);
+            }, 1000);
+        </script>
+    </body>
+</html>
