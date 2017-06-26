@@ -19,10 +19,7 @@ This tool is only publicly accessible from "/" and "/get_uid" until an experimen
 
 This tool is accessible through an easily adapted username and password for some functions.
 
-**"/reset_db"**: Resets/creates the database tables used for recording keystroke data during the experiment.
-
-**"/reset_attempts"**: Resets the keystroke data collected (useful to clear out data when modifying parts of the experiment).
-
-**"/reset_user/<user_id>"**: Resets the number of attempts recorded for a user (which will return them back to the first set of PINs, if necessary).
-
-**"/make_user"**: Create (and set up in the DB) a new user, specifying what group they will be a part of.
+* **"/reset_db"**: Resets/creates the database tables used for recording keystroke data during the experiment.
+* **"/reset_attempts"**: Resets the keystroke data collected (useful to clear out data when modifying parts of the experiment).
+* **"/reset_user/<user_id>"**: Resets the number of attempts recorded for a user (which will return them back to the first set of PINs, if necessary).
+* **"/make_user"**: Create (and set up in the DB) a new user, specifying what group they will be a part of.
