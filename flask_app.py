@@ -10,6 +10,10 @@ from functools import wraps
 app = Flask(__name__)
 sslify = SSLify(app)
 
+BREAK_AT_X_PINS = 10
+NUM_PINS_IN_SUBSET = 5
+NUM_TIMES_REPEAT_SUBSET = 3
+
 def check_auth(username, password):
     """This function is called to check if a username /
     password combination is valid.
@@ -32,9 +36,11 @@ def requires_auth(f):
         return f(*args, **kwargs)
     return decorated
 
-# REWRITE AS A ~POST~ WITH SPECIFIC FIELDS
 @app.route('/save', methods=["POST"])
 def save():
+    """This function allows us to record keystroke data by sending a POST to the correct address,
+    automatically tabulating it in our database.
+    """
     userString = request.form["userString"]
     pinAttempted = request.form["pinAttempted"]
     keyPressed = request.form["keyPressed"]
@@ -47,12 +53,14 @@ def save():
     conn.commit()
     conn.close()
     
+    # This page isn't meant to be accessed by humans, only the robots automatically POSTing data
     return "You shouldn't be here. :("
 
-# REWRITE FOR THE ACTUAL DATABASES WE WANT
 @app.route('/reset_db')
 @requires_auth
 def setup():
+    """This function allows us to (wipe and) create our database tables.
+    """
     conn = sqlite3.connect('attempts.db')
     c = conn.cursor()
 
@@ -68,11 +76,13 @@ def setup():
     conn.commit()
 
     conn.close()
-    return "OK"
+    return "Database reset."
 
 @app.route('/reset_attempts')
 @requires_auth
 def reset_attempts():
+    """This function allows us to nuke ONLY the keystroke data (useful to remove prototyping data).
+    """
     conn = sqlite3.connect('attempts.db')
     c = conn.cursor()
 
@@ -82,11 +92,14 @@ def reset_attempts():
     conn.commit()
 
     conn.close()
-    return "OK"
+    return "Attempts reset."
 
 @app.route('/reset_user/<userID>')
 @requires_auth
 def reset_user(userID):
+    """This function allows us to reset a user's number of attempts back to 0
+    (so they go back to the first pinset of their group)
+    """
     conn = sqlite3.connect('attempts.db')
     c = conn.cursor()
 
@@ -96,7 +109,7 @@ def reset_user(userID):
         c.execute('UPDATE subjects SET attempts=0 WHERE userString=?', res)
         conn.commit()
         conn.close()
-        return "OK"
+        return "User reset."
     else:
         conn.close()
         return "User did not exist."
@@ -104,6 +117,10 @@ def reset_user(userID):
 @app.route('/make_user', methods=['GET', 'POST'])
 @requires_auth
 def make_user():
+    """This function allows us to make a user and specify what group they're in
+    (while setting up the behind the scenes database stuff)
+    """
+    # on a POST, actually poll the database and create things
     if request.method == 'POST':
         userID = request.form['userID']
         groupLabel = request.form['groupLabel']
@@ -114,6 +131,7 @@ def make_user():
         c.execute('SELECT userString FROM userStrings where userID=?', (userID,))
         res = c.fetchone()
         
+        # either we've already concocted a string ID for use as a URL, or we'll come up with one now
         if res:
             userString = res[0]
         else:
@@ -125,24 +143,15 @@ def make_user():
         
         conn.close()
         return redirect(url_for('get_uid'))
+    # otherwise (on a GET), just display an input portal
     else:
         return render_template('user_creation.html')
 
-##
-# ONLY REACTIVATE IF WE WANT TO BE ABLE TO NUKE DATABASE AT WILL (BAD IDEA)
-#
-# @app.route('/reset_attempts')
-# def reset():
-#     conn = sqlite3.connect('attempts.db')
-#     c = conn.cursor()
-#     c.execute('DROP TABLE IF EXISTS attempts')
-#     c.execute('CREATE TABLE attempts (attempt)')
-#     conn.commit()
-#     conn.close()
-#     return "OK"
-
 @app.route('/end/<userString>')
 def end(userString):
+    """This function arrives at the end of a session and updates the database to reflect
+    that a user has undergone a new session.
+    """
     conn = sqlite3.connect('attempts.db')
     c = conn.cursor()
 
@@ -157,15 +166,12 @@ def end(userString):
 
     return render_template('end.html')
 
-##
-# With a GET request, this will display the prompt to enter a User ID. When entered, it will POST to itself to generate the link to go to
-#
-# With a POST request, this will find the internal representation of the ID, and generate a link for a unique experiment from it
-#
-# (I don't think this needs edited much, although the underlying DB might change)
 @app.route('/', methods=['GET', 'POST'])
 @app.route('/get_uid', methods=['GET', 'POST'])
 def get_uid():
+    """This function is the main page for the user side of the experiment.
+    We enter a numeric ID, and it automatically forwards us into the experiment pages.
+    """
     if request.method == 'POST':
         userID = request.form['userID']
         conn = sqlite3.connect('attempts.db')
@@ -177,6 +183,7 @@ def get_uid():
         if res:
             userString = res[0]
         else:
+            # The user ID does not exist in our DB; return error
             return render_template('uid.html', err=True)
         
         conn.close()
@@ -184,10 +191,11 @@ def get_uid():
     else:
         return render_template('uid.html', err=False)
 
-# Note that currently, "attempts" is just a huge list of JSON strings. Can we improve this?
 @app.route('/download')
 @requires_auth
 def download():
+    """This function allows us to pull all the keystroke data from the database and create a human-legible table from it.
+    """
     conn = sqlite3.connect('attempts.db')
     c = conn.cursor()
     
@@ -197,9 +205,10 @@ def download():
     
     return render_template('table.html', res=res)
 
-# Confirms that User ID is valid and sets up experiment variables
 @app.route('/verify/<userString>')
 def verify(userString):
+    """This function confirms that User ID is valid and sets up variables for the experiment pages
+    """
     conn = sqlite3.connect('attempts.db')
     c = conn.cursor()
     c.execute('SELECT * FROM subjects where userString=?', (userString,))
@@ -208,6 +217,7 @@ def verify(userString):
     if res:
         (userString, group, attempts) = res
         
+        # the users will rotate through the sets with different starting points per group
         if group == "A":
             setNumber = attempts
         elif group == "B":
@@ -215,59 +225,77 @@ def verify(userString):
         else:
             setNumber = (attempts + 2) % 3
 
+        ##
+        # this will randomize the order of the PINs displayed;
+        # each PIN corresponds to a letter ('a', 'b', etc.)
+        # and this creates a string of the letters 'a' through 'o' in random order
         orderString = [chr(x) for x in range(ord('a'), ord('a') + 15)]
         shuffle(orderString)
         orderString = ''.join(orderString)
         
         conn.close()
-        return render_template('welcome.html', whereTo="practice", userString=userString, setNumber=setNumber, orderString=orderString, holdString="", numThruSet=0, numPinsToTen=10)
+        return render_template('welcome.html', whereTo="practice", userString=userString, setNumber=setNumber, orderString=orderString, holdString="", numThruSet=0, numPinsToBreak=0)
     else:
+        # if we got here, something is wrong in the DB; just kick back out to the main page for now
         conn.close()
         return redirect(url_for('get_uid'))
 
 @app.route('/continuer/<userString>', methods=['POST'])
 def continuer(userString):
+    """This page merely creates a display prompting the user to press enter to continue with the experiment.
+    """
     setNumber = int(request.form['setNumber'])
     orderString = request.form['orderString']
     holdString = request.form['holdString']
     numThruSet = int(request.form['numThruSet'])
-    numPinsToTen = int(request.form['numPinsToTen'])
+    numPinsToBreak = int(request.form['numPinsToBreak'])
 
-    return render_template('welcome.html', whereTo="experiment", userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numPinsToTen=numPinsToTen)
+    return render_template('welcome.html', whereTo="experiment", userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numPinsToBreak=numPinsToBreak)
 
 @app.route('/practice/<userString>', methods=['POST'])
 def practice(userString):
+    """This page merely creates an area for users to practice with the setup before moving on to the experiment.
+    """
     setNumber = int(request.form['setNumber'])
     orderString = request.form['orderString']
     holdString = request.form['holdString']
     numThruSet = int(request.form['numThruSet'])
-    numPinsToTen = int(request.form['numPinsToTen'])
+    numPinsToBreak = int(request.form['numPinsToBreak'])
 
-    return render_template('practice.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numPinsToTen=numPinsToTen)
+    return render_template('practice.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numPinsToBreak=numPinsToBreak)
 
-# Renders experiment pages
-# note: although most rerouting happens here, pinEntry.html has to carry its weight
 @app.route('/experiment/<userString>', methods=['POST'])
 def experiment(userString):
+    """This function does most of the heavy lifting routing users through the experiment itself.
+    The "pinEntry.html" site helps, where necessary, to change around variables as needed
+    (specifically modifying orderString, holdString, and numPinsToBreak),
+    but otherwise this function does so for us.
+    """
     setNumber = int(request.form['setNumber'])
     orderString = request.form['orderString']
     holdString = request.form['holdString']
     numThruSet = int(request.form['numThruSet'])
-    numPinsToTen = int(request.form['numPinsToTen'])
+    numPinsToBreak = int(request.form['numPinsToBreak'])
     
-    if numPinsToTen == 0:
-        return render_template('breakDisplay.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numPinsToTen=10)
+    # there are no pins left, so go to the end
+    if len(orderString) == 0:
+        return redirect(url_for('end', userString=userString))
+
+    # every (currently, ten) PINs we give the user a break
+    if numPinsToBreak == BREAK_AT_X_PINS:
+        return render_template('breakDisplay.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numPinsToBreak=0)
     else:
-        if len(holdString) == 5:
-            if numThruSet == 2:
-                if len(orderString) == 0:
-                    return redirect(url_for('end', userString=userString))
-                else:
-                    return render_template('pinEntry.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString="", numThruSet=0, numPinsToTen=numPinsToTen)
+        # every (currently, five) PINs we repeat what PINs we give the user, and we show them each set of these PINs (currently, three) times
+        if len(holdString) == NUM_PINS_IN_SUBSET:
+            if numThruSet == (NUM_TIMES_REPEAT_SUBSET - 1):
+                # so, after these (three) times, we throw away the repeats and move on
+                return render_template('pinEntry.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString="", numThruSet=0, numPinsToBreak=numPinsToBreak)
             else:
-                return render_template('pinEntry.html', userString=userString, setNumber=setNumber, orderString=(holdString + orderString), holdString="", numThruSet=(numThruSet + 1), numPinsToTen=numPinsToTen)
+                # but in this case, we need to do a repeat, so we put them back in the order string
+                return render_template('pinEntry.html', userString=userString, setNumber=setNumber, orderString=(holdString + orderString), holdString="", numThruSet=(numThruSet + 1), numPinsToBreak=numPinsToBreak)
         else:
-            return render_template('pinEntry.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numPinsToTen=numPinsToTen)
+            # under no special circumstances, just
+            return render_template('pinEntry.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numPinsToBreak=numPinsToBreak)
         
 
     

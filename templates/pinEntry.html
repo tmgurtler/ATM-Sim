@@ -53,12 +53,6 @@
         <div class="wrapper">
             <div class="main content clearfix">
                 <center>
-                    <div id="null-alert" class="alert" style="visibility:hidden;">
-                        Nothing here.
-                    </div>
-                </center>
-
-                <center>
                     <div id="success-alert" class="alert">
                         <b>Good!</b> The typed PIN is correct!
                     </div>
@@ -67,6 +61,12 @@
                 <center>
                     <div id="error-alert" class="alert">
                         Please try again!
+                    </div>
+                </center>
+
+                <center>
+                    <div id="null-alert" class="alert" style="visibility:hidden;">
+                        Nothing here.
                     </div>
                 </center>
 
@@ -107,7 +107,7 @@
             <input type="hidden" name="orderString" value="{{ orderString[1:] }}">
             <input type="hidden" name="holdString" value="{{ holdString + orderString[0] }}">
             <input type="hidden" name="numThruSet" value="{{ numThruSet }}">
-            <input type="hidden" name="numPinsToTen" value="{{ numPinsToTen - 1 }}">
+            <input type="hidden" name="numPinsToBreak" value="{{ numPinsToBreak + 1 }}">
         </form>
 
         <script>
@@ -176,7 +176,6 @@
                 var nullalert = document.getElementById("null-alert");
                 
                 //otherwise, display the success alert
-                nullalert.style.display = "none";
                 error.style.display = "none";
                 success.style.display = "inline";
 
@@ -190,7 +189,6 @@
                 var nullalert = document.getElementById("null-alert");
                 
                 //display the error alert
-                nullalert.style.display = "none";
                 success.style.display = "none";
                 error.style.display = "inline";
 
