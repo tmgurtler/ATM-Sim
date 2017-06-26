@@ -177,7 +177,7 @@ button.rc-button {
 }
 
 #success-alert {
-    visibility: hidden;
+    display: none;
     background-color: #6ABC6E;
 }
 

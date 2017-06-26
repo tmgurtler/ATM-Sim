@@ -10,13 +10,70 @@
     </head>
 
     <body oncopy="return false" oncut="return false" onpaste="return false" onload="start()" cz-shortcut-listen="true">
+        <script>
+            function sleep(ms) {
+                return new Promise(resolve => setTimeout(resolve, ms));
+            }
+
+            async function displayPin() {
+                var display = document.getElementById("pinDisplay");
+                var entry = document.getElementById("pinEntry");
+
+                entry.style.display = "none";
+                display.style.display = "inline";
+
+                await sleep(4000);
+
+                display.style.display = "none";
+                entry.style.display = "inline";
+
+                document.getElementById("pin").focus()
+            }
+
+            function start() {
+                displayPin();
+            }
+
+            function record(event) {
+                var n = new Date();
+                var timeString = n.toISOString();
+                var keypress = event.keyCode;
+
+                $.post( "/save", { userString: "{{ userString }}", pinAttempted: activePIN, keyPressed: String.fromCharCode(keypress), time: timeString} );
+            }
+
+            function quitEarly() {
+                window.location.replace('/end/{{ userString }}');
+            }
+        </script>
+
         <div class="wrapper">
             <div class="main content clearfix">
-                <div id="success-alert" class="alert">
-                    <b>Good!</b> The typed PIN is correct!
+                <center>
+                    <div id="null-alert" class="alert" style="visibility:hidden;">
+                        Nothing here.
+                    </div>
+                </center>
+
+                <center>
+                    <div id="success-alert" class="alert">
+                        <b>Good!</b> The typed PIN is correct!
+                    </div>
+                </center>
+
+                <center>
+                    <div id="error-alert" class="alert">
+                        Please try again!
+                    </div>
+                </center>
+
+                <div id="pinDisplay" class="banner">
+                    <h1>
+                        Your PIN is <b id="typeToContinue" style="font-family:monospace;"></b>
+                    </h1>
                 </div>
       
-                <div class="main-content shift-form">
+                <div id="pinEntry" class="main-content shift-form">
                     <div class="card signin-card shift-form">
                         <h2 id="instruction">Please input the PIN, then press ENTER.</h2>
 
@@ -28,94 +85,113 @@
                             <input id="signIn" onclick="verifyAndSubmit()" name="signIn" class="rc-button rc-button-submit" type="button" value="ENTER">
                             <input id="quit" onclick="quitEarly()" class="rc-button rc-button-quit" type="button" value="QUIT">
 
-                            <input class="hidden" type="hidden" name="rmShown" value="1">
+                            <input class="hidden" type="hidden" id="countCorrect" name="countCorrect" value="0">
                         </form>
                     </div>
+                </div>
 
-                    <div class="google-footer-bar">
-                        This webpage collects user data for a scientific experiment by NYIT, UIUC, RIT, and BMC.
+                <div class="google-footer-bar">
+                    This webpage collects user data for a scientific experiment by NYIT, UIUC, RIT, and BMC.
 
-                        By participating in the experiment and interacting with this webpage, you agree that information about the timing with which you pressed the keys of your keyboard will be collected. No other personal information is gathered. Data is securely and anonymously collected on a secure database. <br><br>
-                        NEVER TYPE YOUR REAL PINs HERE! INPUT ONLY THE PIN GIVEN TO PERFORM THE EXPERIMENT!
-                    </div>
+                    By participating in the experiment and interacting with this webpage, you agree that information about the timing with which you pressed the keys of your keyboard will be collected. No other personal information is gathered. Data is securely and anonymously collected on a secure database. <br><br>
+                    NEVER TYPE YOUR REAL PINs HERE! INPUT ONLY THE PIN GIVEN TO PERFORM THE EXPERIMENT!
                 </div>
             </div>
         </div>
 
         <form id="sender" method="POST" action="/experiment/{{ userString }}">
             <input type="hidden" name="setNumber" value="{{ setNumber }}">
-            <input type="hidden" name="orderString" value="{{ orderString }}">
-            <input type="hidden" name="holdString" value="{{ holdString }}">
+            <input type="hidden" name="orderString" value="{{ orderString[1:] }}">
+            <input type="hidden" name="holdString" value="{{ holdString + orderString[0] }}">
             <input type="hidden" name="numThruSet" value="{{ numThruSet }}">
-            <input id="pendingInput" type="hidden" name="numThruPin" value="">
+            <input type="hidden" name="numPinsToTen" value="{{ numPinsToTen - 1 }}">
         </form>
 
         <script>
-            function sleep(ms) {
-                return new Promise(resolve => setTimeout(resolve, ms));
-            }
-
-            pinsets = [
-                [1973, 2200, 1971, 0751, 4952, 1004, 6305, 2016, 3487, 8198, 4129, 9720, 3302, 8856, 6486],
-                [6241, 2580, 0852, 1973, 7391, 4618, 0497, 8303, 5312, 5978, 4320, 6702, 7201, 1038, 4902], 
+            var pinsets = [
+                [1973, 2200, 1971, 0751, 4952, 1004, 6305, 2016, 3487, 8198, 4129, 9720, 3302, 8556, 6486],
+                [6241, 2580, 0852, 1937, 7391, 4618, 0497, 8303, 5312, 5978, 4320, 6702, 7201, 1038, 4902], 
                 [1793, 7931, 9317, 3179, 0214, 2140, 4021, 5555, 9999, 9863, 2598, 6325, 4060, 6021, 2140]
             ];
 
-            function start() {
-                printAlerts({{ numThruPin }});
-            }
-
-            async function printAlerts(numThruPin) {
-                var success = document.getElementById("success-alert");
-                var curl = window.location.href;
-                
-                if (numThruPin != 0) {
-                    success.style.visibility = "visible";
-                }
-            }
+            var NUM_ENTRIES = 4;
 
             var setNumber = {{ setNumber }}; 
             var orderString = "{{ orderString }}";
             var specificPIN = orderString.charCodeAt(0) - "a".charCodeAt(0);
-            var numThruPin = {{ numThruPin }};
             var activePIN = pinsets[setNumber][specificPIN];
+            var display = document.getElementById("typeToContinue");
+            typeToContinue.innerHTML = ("0000" + (pinsets[setNumber][specificPIN]).toString()).slice(-4);
 
-            function record(event) {
-                var n = new Date();
-                var timeString = n.toISOString();
-                var keypress = event.keyCode;
+            document.getElementById("pin").addEventListener("keypress", function(e) {
+                if (e.keyCode == 13) {
+                    e.preventDefault();
 
-                $.post( "/save", { userString: "{{ userString }}", pinAttempted: activePIN, keyPressed: String.fromCharCode(keypress), time: timeString} );
-            }
-
-            document.getElementById("pin").addEventListener("keyup", function(event) {
-                event.preventDefault();
-                if (event.keyCode == 13) {
                     document.getElementById("signIn").click();
                 }
             });
 
-            function quitEarly() {
-                window.location.replace('/end/{{ userString }}');
+            $(document).keypress(function(e){
+                var display = document.getElementById("pinDisplay");
+                var entry = document.getElementById("pinEntry");
+                var pin = document.getElementById("pin");
+
+                var numTyped = 48 <= e.which && e.which <= 57;
+                var inPinDisplay = display.style.display == "inline";
+                
+                if (numTyped && inPinDisplay) {
+                    display.style.display = "none";
+                    entry.style.display = "inline";
+
+                    record(e);
+                    pin.focus();
+                }
+            });
+
+            function correctEntry() {
+                var soFar = parseInt(document.getElementById("countCorrect").value);
+                soFar++;
+
+                if (soFar == NUM_ENTRIES) {
+                    form = document.getElementById("sender");
+                    form.submit();
+                }
+
+                document.getElementById("countCorrect").value = soFar.toString();
+
+                var success = document.getElementById("success-alert");
+                var error = document.getElementById("error-alert");
+                var nullalert = document.getElementById("null-alert");
+                
+                nullalert.style.display = "none";
+                error.style.display = "none";
+                success.style.display = "inline";
+
+                document.getElementById("pin").value = "";
+            }
+
+            function incorrectEntry() {
+                var success = document.getElementById("success-alert");
+                var error = document.getElementById("error-alert");
+                var nullalert = document.getElementById("null-alert");
+                
+                nullalert.style.display = "none";
+                success.style.display = "none";
+                error.style.display = "inline";
+
+                document.getElementById("pin").value = "";
             }
 
             function verifyAndSubmit() {
-                var n = new Date();
-                var timeString = n.toISOString();
                 var enteredPIN = document.getElementById("pin").value;
 
-                $.post( "/save", { userString: "{{ userString }}", pinAttempted: activePIN, keyPressed: "\n", time: timeString} );
-
-                var nextPinUp = document.getElementById("pendingInput");
                 if (enteredPIN == activePIN) {
-                    nextPinUp.value = (numThruPin + 1).toString();
+                    correctEntry();
                 }
                 else {
-                    nextPinUp.value = (-1).toString();
+                    incorrectEntry();
+                    displayPin();
                 }
-
-                form = document.getElementById("sender");
-                form.submit();
             }
         </script>
     </body>

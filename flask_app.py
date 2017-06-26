@@ -220,7 +220,7 @@ def verify(userString):
         orderString = ''.join(orderString)
         
         conn.close()
-        return render_template('welcome.html', whereTo="practice", userString=userString, setNumber=setNumber, orderString=orderString, holdString="", numThruSet=0, numThruPin=(-1))
+        return render_template('welcome.html', whereTo="practice", userString=userString, setNumber=setNumber, orderString=orderString, holdString="", numThruSet=0, numPinsToTen=10)
     else:
         conn.close()
         return redirect(url_for('get_uid'))
@@ -231,9 +231,9 @@ def continuer(userString):
     orderString = request.form['orderString']
     holdString = request.form['holdString']
     numThruSet = int(request.form['numThruSet'])
-    numThruPin = int(request.form['numThruPin'])
+    numPinsToTen = int(request.form['numPinsToTen'])
 
-    return render_template('welcome.html', whereTo="experiment", userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numThruPin=numThruPin)
+    return render_template('welcome.html', whereTo="experiment", userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numPinsToTen=numPinsToTen)
 
 @app.route('/practice/<userString>', methods=['POST'])
 def practice(userString):
@@ -241,36 +241,33 @@ def practice(userString):
     orderString = request.form['orderString']
     holdString = request.form['holdString']
     numThruSet = int(request.form['numThruSet'])
-    numThruPin = int(request.form['numThruPin'])
+    numPinsToTen = int(request.form['numPinsToTen'])
 
-    return render_template('practice.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numThruPin=numThruPin)
+    return render_template('practice.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numPinsToTen=numPinsToTen)
 
 # Renders experiment pages
-# note: although most rerouting happens here, this does expect that numThruPin gets set properly on pinEntry.html
+# note: although most rerouting happens here, pinEntry.html has to carry its weight
 @app.route('/experiment/<userString>', methods=['POST'])
 def experiment(userString):
     setNumber = int(request.form['setNumber'])
     orderString = request.form['orderString']
     holdString = request.form['holdString']
     numThruSet = int(request.form['numThruSet'])
-    numThruPin = int(request.form['numThruPin'])
+    numPinsToTen = int(request.form['numPinsToTen'])
     
-    if numThruPin == -1:
-        return render_template('pinDisplay.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numThruPin=0)
-    elif numThruPin == 3:
-        holdString += orderString[0]
-        orderString = orderString[1:]
+    if numPinsToTen == 0:
+        return render_template('breakDisplay.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numPinsToTen=10)
+    else:
         if len(holdString) == 5:
             if numThruSet == 2:
                 if len(orderString) == 0:
                     return redirect(url_for('end', userString=userString))
                 else:
-                    return render_template('breakDisplay.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString="", numThruSet=0, numThruPin=(-1))
+                    return render_template('pinEntry.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString="", numThruSet=0, numPinsToTen=numPinsToTen)
             else:
-                return render_template('breakDisplay.html', userString=userString, setNumber=setNumber, orderString=(holdString + orderString), holdString="", numThruSet=(numThruSet + 1), numThruPin=(-1))
+                return render_template('pinEntry.html', userString=userString, setNumber=setNumber, orderString=(holdString + orderString), holdString="", numThruSet=(numThruSet + 1), numPinsToTen=numPinsToTen)
         else:
-            return render_template('redirect.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numThruPin=(-1))
-    else:
-        return render_template('pinEntry.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numThruPin=numThruPin)
+            return render_template('pinEntry.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numPinsToTen=numPinsToTen)
+        
 
     

@@ -11,7 +11,7 @@
     
     <body onload="timer()">
         <div class="banner">
-            <h2 id="instruction">Please practice using the machine. After <b id="waitToContinue" style="font-family:monospace;">60</b> seconds, the machine will move to the next step.</h2>
+            <h2 id="instruction">Please practice using the machine. After <b id="waitToContinue" style="font-family:monospace;">45</b> seconds, the machine will move to the next step.</h2>
         </div>
 
         <center>       
@@ -25,7 +25,7 @@
             <input type="hidden" name="orderString" value="{{ orderString }}">
             <input type="hidden" name="holdString" value="{{ holdString }}">
             <input type="hidden" name="numThruSet" value="{{ numThruSet }}">
-            <input type="hidden" name="numThruPin" value="{{ numThruPin }}">
+            <input type="hidden" name="numPinsToTen" value="{{ numPinsToTen }}">
         </form>
 
         <script>
@@ -36,7 +36,7 @@
             var startTime = new Date().getTime();
 
             async function timer() {
-                await sleep(60000);
+                await sleep(45000);
                 form = document.getElementById("sender");
                 form.submit();
             }
@@ -52,7 +52,7 @@
                 var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
                 // Display the result in the element with id="waitToContinue"
-                document.getElementById("waitToContinue").innerHTML = (60 - seconds);
+                document.getElementById("waitToContinue").innerHTML = (45 - seconds);
             }, 1000);
         </script>
     </body>

@@ -14,7 +14,7 @@
             <div class="main content clearfix">
                 <div class="banner">
                     <h1>
-                        Please take a break! More pins will appear in <b id="waitToContinue" style="font-family:monospace;">15</b> seconds.
+                        Please take a break! More pins will appear in <b id="waitToContinue" style="font-family:monospace;">10</b> seconds.
                     </h1>
                 </div>
                 
@@ -32,7 +32,7 @@
             <input type="hidden" name="orderString" value="{{ orderString }}">
             <input type="hidden" name="holdString" value="{{ holdString }}">
             <input type="hidden" name="numThruSet" value="{{ numThruSet }}">
-            <input type="hidden" name="numThruPin" value="{{ numThruPin }}">
+            <input type="hidden" name="numPinsToTen" value="{{ numPinsToTen }}">
         </form>
 
         <script>
@@ -43,7 +43,7 @@
             var startTime = new Date().getTime();
 
             async function timer() {
-                await sleep(15000);
+                await sleep(10000);
                 form = document.getElementById("sender");
                 form.submit();
             }
@@ -59,7 +59,7 @@
                 var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
                 // Display the result in the element with id="waitToContinue"
-                document.getElementById("waitToContinue").innerHTML = (15 - seconds);
+                document.getElementById("waitToContinue").innerHTML = (10 - seconds);
             }, 1000);
         </script>
     </body>
