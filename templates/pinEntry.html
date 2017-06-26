@@ -15,6 +15,7 @@
                 return new Promise(resolve => setTimeout(resolve, ms));
             }
 
+            //Changes display to just showing the PIN, not showing the entry form, for 4 seconds
             async function displayPin() {
                 var display = document.getElementById("pinDisplay");
                 var entry = document.getElementById("pinEntry");
@@ -27,6 +28,7 @@
                 display.style.display = "none";
                 entry.style.display = "inline";
 
+                //autofocus the PIN entry so that users don't have to reclick it
                 document.getElementById("pin").focus()
             }
 
@@ -34,6 +36,7 @@
                 displayPin();
             }
 
+            //send keystroke data to the recording portal
             function record(event) {
                 var n = new Date();
                 var timeString = n.toISOString();
@@ -114,15 +117,20 @@
                 [1793, 7931, 9317, 3179, 0214, 2140, 4021, 5555, 9999, 9863, 2598, 6325, 4060, 6021, 2140]
             ];
 
+            //the number of times we have users type in their PIN
             var NUM_ENTRIES = 4;
 
+            //figure out which PIN we're using
             var setNumber = {{ setNumber }}; 
             var orderString = "{{ orderString }}";
             var specificPIN = orderString.charCodeAt(0) - "a".charCodeAt(0);
             var activePIN = pinsets[setNumber][specificPIN];
+
+            //display the PIN in the display part
             var display = document.getElementById("typeToContinue");
             typeToContinue.innerHTML = ("0000" + (pinsets[setNumber][specificPIN]).toString()).slice(-4);
 
+            //listen for enter, and use it to click on the "submit" button for the PIN
             document.getElementById("pin").addEventListener("keypress", function(e) {
                 if (e.keyCode == 13) {
                     e.preventDefault();
@@ -136,9 +144,12 @@
                 var entry = document.getElementById("pinEntry");
                 var pin = document.getElementById("pin");
 
-                var numTyped = 48 <= e.which && e.which <= 57;
+                //If we're in the pin display mode
                 var inPinDisplay = display.style.display == "inline";
-                
+                //and the key typed is a number
+                var numTyped = 48 <= e.which && e.which <= 57;
+
+                //then skip forward automatically to entering the PIN (and record the keystroke)
                 if (numTyped && inPinDisplay) {
                     display.style.display = "none";
                     entry.style.display = "inline";
@@ -149,24 +160,27 @@
             });
 
             function correctEntry() {
+                //count how many times the correct PIN has been typed
                 var soFar = parseInt(document.getElementById("countCorrect").value);
                 soFar++;
+                document.getElementById("countCorrect").value = soFar.toString();
 
+                //if that number of times is all we need, move on to next page
                 if (soFar == NUM_ENTRIES) {
                     form = document.getElementById("sender");
                     form.submit();
                 }
 
-                document.getElementById("countCorrect").value = soFar.toString();
-
                 var success = document.getElementById("success-alert");
                 var error = document.getElementById("error-alert");
                 var nullalert = document.getElementById("null-alert");
                 
+                //otherwise, display the success alert
                 nullalert.style.display = "none";
                 error.style.display = "none";
                 success.style.display = "inline";
 
+                //and erase the PIN typed in for a new go
                 document.getElementById("pin").value = "";
             }
 
@@ -175,10 +189,12 @@
                 var error = document.getElementById("error-alert");
                 var nullalert = document.getElementById("null-alert");
                 
+                //display the error alert
                 nullalert.style.display = "none";
                 success.style.display = "none";
                 error.style.display = "inline";
 
+                //and erase the PIN typed in for a new go
                 document.getElementById("pin").value = "";
             }
 

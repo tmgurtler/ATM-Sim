@@ -37,6 +37,8 @@
 
             async function timer() {
                 await sleep(45000);
+
+                //redirect to next page after time has expired
                 form = document.getElementById("sender");
                 form.submit();
             }
