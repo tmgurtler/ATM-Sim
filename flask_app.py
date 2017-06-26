@@ -296,6 +296,4 @@ def experiment(userString):
         else:
             # under no special circumstances, just move variables along directly
             return render_template('pinEntry.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numPinsToBreak=numPinsToBreak)
-        
-
     
