@@ -294,7 +294,7 @@ def experiment(userString):
                 # but in this case, we need to do a repeat, so we put them back in the order string
                 return render_template('pinEntry.html', userString=userString, setNumber=setNumber, orderString=(holdString + orderString), holdString="", numThruSet=(numThruSet + 1), numPinsToBreak=numPinsToBreak)
         else:
-            # under no special circumstances, just
+            # under no special circumstances, just move variables along directly
             return render_template('pinEntry.html', userString=userString, setNumber=setNumber, orderString=orderString, holdString=holdString, numThruSet=numThruSet, numPinsToBreak=numPinsToBreak)
         
 
