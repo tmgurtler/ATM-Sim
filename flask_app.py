@@ -279,7 +279,8 @@ def experiment(userString):
     
     # there are no pins left, so go to the end
     if len(orderString) == 0:
-        return redirect(url_for('end', userString=userString))
+        if numThruSet == (NUM_TIMES_REPEAT_SUBSET - 1):
+            return redirect(url_for('end', userString=userString))
 
     # every (currently, ten) PINs we give the user a break
     if numPinsToBreak == BREAK_AT_X_PINS:
